@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSI Service Experience</title>
+
+<style>
+    /* --- THEME ENGINE --- */
+    :root { 
+        --primary: #0052CC; 
+        --primary-gradient: linear-gradient(135deg, #0052CC 0%, #0747A6 100%);
+        --bg: #F4F5F7; 
+        --text-main: #172B4D; 
+        --text-sub: #6B778C;
+        --shadow-card: 0 4px 20px rgba(0,0,0,0.06);
+        --shadow-hover: 0 12px 40px rgba(0, 82, 204, 0.15);
+    }
+    
+    body { font-family: "Segoe UI", Roboto, sans-serif; margin: 0; background: var(--bg); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* --- HEADER --- */
+    .navbar { height: 70px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; z-index: 10; }
+    .brand-logo { font-size: 24px; font-weight: 800; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .nav-btn.primary { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 50px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 82, 204, 0.3); text-decoration: none; display: flex; gap: 8px; transition: 0.2s; }
+    .nav-btn.primary:hover { background: #0747A6; transform: translateY(-2px); }
+
+    .container { flex: 1; position: relative; overflow: hidden; }
+
+    /* --- HOME VIEW --- */
+    #view-home { height: 100%; overflow-y: auto; padding: 40px 60px; display: block; animation: fadeUp 0.4s ease; text-align: center; }
+    .hero { text-align: center; max-width: 800px; margin: 0 auto 100px auto; padding-bottom: 20px; }
+    .hero h1 { font-size: 48px; font-weight: 800; letter-spacing: -1px; margin-bottom: 15px; }
+    .hero p { font-size: 20px; color: var(--text-sub); margin-bottom: 40px; }
+    .search-bar { width: 100%; max-width: 600px; padding: 20px 30px; border-radius: 50px; border: 2px solid white; background: white; box-shadow: var(--shadow-card); font-size: 18px; outline: none; transition: 0.3s; }
+    .search-bar:focus { border-color: var(--primary); box-shadow: var(--shadow-hover); }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto 60px auto; text-align: left; padding-bottom: 20px; }
+    .card { background: white; padding: 30px; border-radius: 20px; cursor: pointer; transition: 0.3s; position: relative; overflow: visible; border: 1px solid transparent; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
+    .card:hover { transform: translateY(-8px); box-shadow: var(--shadow-hover); border-color: #DEEBFF; z-index: 2; }
+    .card-icon { font-size: 42px; margin-bottom: 20px; display: block; }
+    .card-title { font-weight: 700; font-size: 20px; display: block; }
+    .card-sub { font-size: 14px; color: var(--text-sub); margin-top: auto; padding-top: 10px; }
+
+    /* --- SUB-CATEGORY VIEW --- */
+    #view-subcat { display: none; height: 100%; overflow-y: auto; padding: 40px 60px; animation: fadeUp 0.4s ease; }
+    .subcat-header { max-width: 1200px; margin: 0 auto 40px auto; }
+    .back-btn { color: var(--text-sub); cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; background: white; border-radius: 30px; margin-bottom: 20px; transition:0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .back-btn:hover { color: var(--primary); transform: translateX(-5px); }
+    .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; padding-bottom: 20px; }
+    .topic-card { background: white; padding: 25px; border-radius: 16px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 20px; border: 1px solid transparent; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+    .topic-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); border-color: var(--primary); z-index: 2; }
+    .topic-icon-box { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; background: #E6EFFC; color: var(--primary); flex-shrink: 0; }
+    .topic-info h3 { margin: 0; font-size: 18px; font-weight: 700; }
+    .topic-info p { margin: 5px 0 0 0; font-size: 13px; color: var(--text-sub); }
+
+    /* --- ARTICLE READER --- */
+    #view-article { display: none; height: 100%; grid-template-columns: 320px 1fr; }
+    .sidebar-list { background: white; border-right: 1px solid #EBECF0; overflow-y: auto; padding: 20px; }
+    .sidebar-item { padding: 18px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.1s; }
+    .sidebar-item:hover { background: #F4F5F7; }
+    .sidebar-item.active { background: #E6EFFC; color: var(--primary); font-weight: 700; }
+    .reader-pane { overflow-y: auto; background: white; }
+    
+    .article-hero { background: var(--bg); padding: 30px 60px; border-bottom: 1px solid #EBECF0; display: flex; flex-direction: column; gap: 15px; flex-shrink: 0;}
+    .article-title { font-size: 32px; font-weight: 800; line-height: 1.3; color: var(--text-main); margin: 0; max-width: 800px; }
+    .meta-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 10px; }
+    .confluence-btn, .pdf-btn { font-size: 13px; padding: 8px 16px; background: white; border: 1px solid #DEEBFF; color: var(--primary); text-decoration: none; border-radius: 30px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; }
+    .confluence-btn:hover { background: #F4F5F7; border-color: var(--primary); }
+    .pdf-btn { background: #FFEBE6; border: 1px solid #FFBDAD; color: #BF2600; }
+    .pdf-btn:hover { background: #FF5630; color: white; border-color: #FF5630; }
+
+    /* ARTICLE CONTENT */
+    .article-content { padding: 40px 60px; max-width: 800px; font-size: 17px; line-height: 1.8; color: #172B4D; }
+    .article-content h3 { font-size: 22px; margin-top: 30px; color: #0052CC; border-bottom: 1px solid #EBECF0; padding-bottom: 8px; }
+    .article-content p { margin-bottom: 15px; }
+    .article-content ul, .article-content ol { padding-left: 25px; margin-bottom: 20px; }
+    .article-content li { margin-bottom: 8px; }
+    .step-img { max-width: 100%; border: 1px solid #DDD; border-radius: 8px; margin: 20px 0; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .pro-tip { background: #E6EFFC; border-left: 4px solid #0052CC; padding: 15px; border-radius: 4px; margin: 20px 0; font-size: 14px; }
+    
+    /* --- CHAT --- */
+    .chat-wrapper { position: fixed; bottom: 30px; right: 30px; z-index: 100; display: flex; align-items: center; gap: 15px; }
+    .chat-toggle { width: 64px; height: 64px; background: var(--primary-gradient); border-radius: 50%; box-shadow: 0 10px 25px rgba(0,82,204,0.4); display: flex; justify-content: center; align-items: center; color: white; font-size: 32px; cursor: pointer; transition: 0.2s; }
+    .chat-toggle:hover { transform: scale(1.1) rotate(-5deg); }
+    .chat-message-bubble { background: white; padding: 12px 20px; border-radius: 12px 12px 0 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); font-weight: 600; font-size: 14px; color: var(--text-main); position: relative; animation: popIn 0.5s ease 1s backwards; border: 1px solid #EBECF0; white-space: nowrap; }
+    
+    /* CHAT FRAME */
+    .chat-frame { position: fixed; bottom: 110px; right: 30px; width: 400px; height: 600px; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); z-index: 99; display: none; flex-direction: column; overflow: hidden; border: 1px solid #EBECF0; animation: slideUp 0.3s ease; }
+    .chat-header { background: var(--primary); color: white; padding: 15px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+    .chat-history { flex: 1; padding: 20px; overflow-y: auto; background: white; display: flex; flex-direction: column; gap: 15px; }
+    
+    .msg { padding: 12px 16px; border-radius: 12px; max-width: 85%; font-size: 14px; line-height: 1.5; animation: fadeUp 0.2s ease; word-wrap: break-word; }
+    .msg.bot { background: #F4F5F7; align-self: flex-start; border-bottom-left-radius: 2px; color: #172B4D; border: 1px solid #EBECF0; }
+    .msg.user { background: #E6EFFC; color: #0052CC; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .chat-input-area { padding: 15px; border-top: 1px solid #EBECF0; display: flex; gap: 10px; }
+    .chat-input { flex: 1; border: 1px solid #DFE1E6; padding: 10px; border-radius: 20px; outline: none; font-family: inherit; }
+    .send-btn { background: var(--primary); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    /* PRINT CSS */
+    @media print {
+        body * { visibility: hidden; }
+        .reader-pane, .reader-pane * { visibility: visible; }
+        .reader-pane { position: absolute; left: 0; top: 0; width: 100%; padding: 0; }
+        .navbar, .sidebar-list, .chat-wrapper, .chat-frame, .back-btn, .meta-bar { display: none !important; }
+    }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: translateX(10px) scale(0.9); } to { opacity: 1; transform: translateX(0) scale(1); } }
+</style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="brand-logo" onclick="goHome()"><span>⚡ OSI Smart Portal</span></div>
+    <a href="https://osisystems.atlassian.net/servicedesk/customer/portal/4" target="_blank" class="nav-btn primary">
+        <span>+</span> Raise Ticket
+    </a>
+</div>
+
+<div class="container">
+    <div id="view-home">
+        <div class="hero">
+            <h1>How can we help you?</h1>
+            <p>Search the knowledge base or use the AI Assistant.</p>
+            <input type="text" class="search-bar" placeholder="Search (e.g. VPN, Password)..." onkeyup="handleSearch(event)">
+        </div>
+        <div class="grid" id="catGrid"></div>
+    </div>
+
+    <div id="view-subcat">
+        <div class="subcat-header">
+            <div class="back-btn" onclick="goHome()">← Back to Categories</div>
+            <h1 id="subCatTitle" style="font-size:36px; font-weight:800; margin-top:10px;"></h1>
+            <p style="color:var(--text-sub); font-size:18px;">Select a topic below.</p>
+        </div>
+        <div class="topic-grid" id="subCatGrid"></div>
+    </div>
+
+    <div id="view-article">
+        <div class="sidebar-list" id="articleList"></div>
+        <div class="reader-pane">
+            <div class="article-hero">
+                <div class="back-btn" onclick="goBackToSub()">← Back to Topics</div>
+                <div id="artTitle" class="article-title"></div>
+                <div class="meta-bar">
+                    <a id="confluenceLink" href="#" target="_blank" class="confluence-btn"><span>↗</span> View in Confluence</a>
+                    <button onclick="window.print()" class="pdf-btn"><span>⬇</span> Download / Print</button>
+                </div>
+            </div>
+            <div id="artBody" class="article-content"></div>
+        </div>
+    </div>
+</div>
+
+<div class="chat-wrapper">
+    <div class="chat-message-bubble">Hello! I am the OSI IT Assistant. I can answer questions about your IT issues. How can I help?</div>
+    <div class="chat-toggle" onclick="toggleChat()">🤖</div>
+</div>
+
+<div id="chat-frame" class="chat-frame">
+    <div class="chat-header"><span>OSI AI Assistant</span><span style="cursor:pointer;" onclick="toggleChat()">✕</span></div>
+    <div id="chatHistory" class="chat-history">
+        <div class="msg bot">Hello! I am the OSI IT Assistant. I can answer questions about your IT issues. How can I help?</div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="userMsg" class="chat-input" placeholder="Type a message..." onkeypress="handleEnter(event)">
+        <button class="send-btn" onclick="sendMsg()">➤</button>
+    </div>
+</div>
+
+<script>
+    // --- CONFIGURATION ---
+    // ✅ YOUR SPECIFIC API KEY
+    const GOOGLE_KEY = "AIzaSyCU51YPqNBs7zm3yqQuzF59_lfuEjdDh80"; 
+    
+    // ✅ YOUR SPECIFIC MODEL (Tested & Working)
+    const MODEL_NAME = "gemini-2.0-flash"; 
+
+    // --- MASTER DATA ---
+    const DATA = {
+        "Access": {
+            icon: "🔐",
+            subs: {
+                "Password": { icon: "🔑", articles: [
+                    { 
+                        title: "Set-up security questions & update Windows password", 
+                        url: "https://osisystems.atlassian.net/servicedesk/customer/portal/4/article/1241972858", 
+                        content: `<h3>Overview</h3><p>Our Corp password is the one you use to sign in to your @osi-systems.com account. This password expires every 90 days.</p><h3>Change password</h3><p><b>Option 1:</b> Navigate to <a href='https://password.osi-systems.com' target='_blank'>One Identity Password Manager</a></p><p><b>Option 2:</b> If locked out, click on 'Sign-in options' from the login screen.</p><img src="image-20240814-153804.png" class="step-img" onerror="this.style.display='none'"><p>Click the key icon and select 'Open the Password Self-Service site'.</p><img src="image-20240814-154101.png" class="step-img" onerror="this.style.display='none'"><p>Follow the prompts to reset your password.</p><img src="image-20240814-172546.png" class="step-img" onerror="this.style.display='none'">`
+                    }
+                ]}
+            }
+        },
+        "Software": {
+            icon: "💿",
+            subs: {
+                "Teams": { icon: "💬", articles: [
+                    { 
+                        title: "Resolve Microsoft Teams Login Issue", 
+                        url: "https://osisystems.atlassian.net/servicedesk/customer/portal/4/article/240484377", 
+                        content: `<h3>Issue Description</h3><p>If Teams is frozen or stuck in a login loop, follow these steps.</p><h3>Step 1: Quit Teams</h3><p>Right click on the Teams icon in the system tray and select <b>Quit</b>.</p><img src="image-20230626-170602.png" class="step-img" onerror="this.style.display='none'"><h3>Step 2: Clear Cache</h3><ol><li>Press <b>Windows + R</b>.</li><li>Type <code>%appdata%\\Microsoft\\Teams</code>.</li><li>Delete all files.</li><li>Restart Teams.</li></ol><img src="att_5_for_1430323276.png" class="step-img" onerror="this.style.display='none'">`
+                    },
+                    { 
+                        title: "Hide, Mute, or Pin a Chat", 
+                        url: "https://osisystems.atlassian.net/servicedesk/customer/portal/4/article/235044905", 
+                        content: `<h3>Hide a Chat</h3><p>Select <b>More options (...)</b> > <b>Hide</b>. The chat will be hidden until a new message arrives.</p><h3>Mute a Chat</h3><p>Select <b>More options (...)</b> > <b>Mute</b>. You will still receive messages, but no notifications.</p><h3>Pin a Chat</h3><p>Select <b>More options (...)</b> > <b>Pin</b> to keep the conversation at the top.</p>` 
+                    },
+                    { 
+                        title: "Share your Screen", 
+                        url: "https://osisystems.atlassian.net/servicedesk/customer/portal/4/article/234979442", 
+                        content: `<h3>How to Share</h3><p>In a meeting, click the <b>Share icon</b> (Up Arrow) in the top-right corner.</p><h3>Options</h3><ul><li><b>Screen:</b> Shares entire desktop.</li><li><b>Window:</b> Shares specific app.</li></ul><p>To stop, click <b>Stop sharing</b> in the floating toolbar.</p>` 
+                    },
+                    { 
+                        title: "Create a New Team", 
+                        url: "https://osisystems.atlassian.net/servicedesk/customer/portal/4/article/235044905", 
+                        content: `<h3>Step 1: Initialize</h3><p>Click <b>Teams</b> tab > <b>Join or create a team</b>.</p><img src="image-20240515-182950.png" class="step-img" onerror="this.style.display='none'"><h3>Step 2: Setup</h3><p>Click <b>Create team</b> card.</p><img src="image-20240515-183126.png" class="step-img" onerror="this.style.display='none'"><p>Choose <b>From scratch</b>, then select Private or Public.</p>` 
+                    }
+                ]},
+                "OneDrive": { icon: "☁️", articles: [
+                    { title: "External File Sharing Instructions", url: "https://osisystems.atlassian.net/servicedesk/customer/portal/4/article/1300004900", content: "<h3>Sharing Files</h3><p>Right-click file > Share > Specific People. Enter external email.</p>" },
+                    { title: "Check Storage Space", url: "https://osisystems.atlassian.net/servicedesk/customer/portal/4/article/2266693633", content: "<h3>Quota Check</h3><p>Go to OneDrive Settings > Storage Metrics.</p>" }
+                ]}
+            }
+        },
+        "Mobile": {
+            icon: "📱",
+            subs: {
+                "Intune": { icon: "🛡️", articles: [
+                    { 
+                        title: "iOS: Change PIN / Passcode", 
+                        url: "https://osisystems.atlassian.net/servicedesk/customer/portal/4/article/1300004900", 
+                        content: `<h3>Change Passcode</h3><ol><li>Go to <b>Settings</b> > <b>Face ID & Passcode</b>.</li><li>Enter current passcode.</li><li>Tap <b>Change Passcode</b>.</li><li>Enter new 6-digit code.</li></ol><h3>Sync Status</h3><p>Open <b>Company Portal</b> app > Devices > Check Status.</p>` 
+                    },
+                    { title: "Android PIN Compliance", url: "https://osisystems.atlassian.net/servicedesk/customer/portal/4/article/1430520120", content: "<h3>Android Setup</h3><p>Ensure your device has a 6-digit PIN set in Settings > Security.</p>" }
+                ]}
+            }
+        },
+        "Network": {
+            icon: "📡",
+            subs: {
+                "VPN": { icon: "🔒", articles: [
+                    { 
+                        title: "Self Help: VPN: Instructions to connect VPN.", 
+                        url: "https://osisystems.atlassian.net/servicedesk/customer/portal/4/article/1280147457", 
+                        content: `<h3>How to Connect to Ivanti Secure Access Client</h3>
+                            <p>This guide explains how to connect to the VPN using the Ivanti Secure Access Client application.</p>
+                            <h4>Category:</h4><p>Active directory – VPN connectivity issues</p>
+                            <h4>Tools & Access Details:</h4><p>Ivanti Secure Access Client application</p>
+                            <p>Open the **Ivanti Secure Access Client** application on your computer.</p>
+                            <img src="image-20230626-222855.png" class="step-img" onerror="this.style.display='none'">
+                            
+                            <h4>Available VPNs (Examples):</h4>
+                            <ul>
+                                <li>vpnhaw.osi-systems.com</li>
+                                <li>vpnhaw2.osi-systems.com</li>
+                                <li>vpnhtc.osi-systems.com</li>
+                                <li>vpnhtc2.osi-systems.com</li>
+                                <li>vpnsin.osi-systems.com</li>
+                                <li>vpnjbm.osi-systems.com</li>
+                                <li>vpnjbm2.osi-systems.com</li>
+                                <li>vpnsal.osi-systems.com</li>
+                                <li>vpnsal2.osi-systems.com</li>
+                                <li>vpnhrt.osi-systems.com</li>
+                                <li>vpnhrt2.osi-systems.com</li>
+                            </ul>
+                            
+                            <h3>Adding a New Connection</h3>
+                            <p>To add a new connection, click on the **“+” icon** available on the top right in the Connections window.</p>
+                            <img src="image-20230627-181834.png" class="step-img" onerror="this.style.display='none'">
+                            <img src="image-20230627-181843.png" class="step-img" onerror="this.style.display='none'">
+                            <p>Enter the **Name** and **Server URL** you wish to connect to, then click **Add**.</p>
+                            <img src="image-20230627-181908.png" class="step-img" onerror="this.style.display='none'">
+
+                            <h3>Connecting to VPN</h3>
+                            <p>In the main window, select the connection (if not already selected) and click on **Connect**.</p>
+                            <img src="image-20230627-181918.png" class="step-img" onerror="this.style.display='none'">
+                            <p>On the next page, you will need to enter your **domain/laptop password** and click **Sign in**.</p>
+                            <img src="image-20230627-181928.png" class="step-img" onerror="this.style.display='none'">
+                            <p>Then, **approve the sign-in request** in the Microsoft Authenticator application installed on your phone.</p>
+                            <img src="image-20230627-181936.png" class="step-img" onerror="this.style.display='none'">
+                            <p>Alternately, you can click **"I can’t use my Microsoft Authenticator app right now"** and enter a 6-digit passcode from the mobile application.</p>
+                            <img src="image-20230627-182009.png" class="step-img" onerror="this.style.display='none'">
+                            
+                            <h3>Verification</h3>
+                            <p>Once connected, you will see a **green tick mark** next to the VPN connection name in the Ivanti Secure Access Client window.</p>
+                            <img src="image-20230626-223049.png" class="step-img" onerror="this.style.display='none'>`
+                    }
+                ]},
+                "Wireless": { icon: "📶", articles: [
+                    { title: "Guest Wi-Fi Setup", url: "https://osisystems.atlassian.net/servicedesk/customer/portal/4/article/1280147457", content: "<h3>Wi-Fi Access</h3><p>Select OSI-Guest network and accept terms in the browser window.</p>" }
+                ]}
+            }
+        }
+    };
+
+    // --- LOGIC ---
+    let currentCat = "";
+
+    function init() {
+        const grid = document.getElementById('catGrid');
+        for (let cat in DATA) {
+            let el = document.createElement('div');
+            el.className = 'card';
+            el.onclick = () => openCategory(cat);
+            el.innerHTML = `<span class="card-icon">${DATA[cat].icon}</span><span class="card-title">${cat}</span><span class="card-sub">Browse Topics</span>`;
+            grid.appendChild(el);
+        }
+    }
+    function openCategory(cat) {
+        currentCat = cat;
+        document.getElementById('view-home').style.display = 'none';
+        document.getElementById('view-subcat').style.display = 'block';
+        document.getElementById('subCatTitle').innerText = cat;
+        const grid = document.getElementById('subCatGrid');
+        grid.innerHTML = '';
+        let subs = DATA[cat].subs;
+        for (let sub in subs) {
+            let count = DATA[cat].subs[sub].articles.length;
+            let icon = DATA[cat].subs[sub].icon || '📂';
+            grid.innerHTML += `<div class="topic-card" onclick="openSub('${sub}')"><div class="topic-icon-box">${icon}</div><div class="topic-info"><h3>${sub}</h3><p>${count} Articles</p></div></div>`;
+        }
+    }
+    function openSub(sub) {
+        document.getElementById('view-subcat').style.display = 'none';
+        document.getElementById('view-article').style.display = 'grid';
+        const articles = DATA[currentCat].subs[sub].articles;
+        renderArticleList(articles);
+        loadArticle(articles[0]);
+    }
+    function renderArticleList(articles) {
+        const list = document.getElementById('articleList');
+        list.innerHTML = '';
+        articles.forEach(art => {
+            let el = document.createElement('div');
+            el.className = 'sidebar-item';
+            el.innerText = art.title;
+            el.onclick = () => { loadArticle(art); highlight(el); };
+            list.appendChild(el);
+        });
+        highlight(list.firstChild);
+    }
+    function loadArticle(art) {
+        document.getElementById('artTitle').innerText = art.title;
+        document.getElementById('confluenceLink').href = art.url;
+        document.getElementById('artBody').innerHTML = art.content;
+    }
+    function highlight(el) {
+        document.querySelectorAll('.sidebar-item').forEach(x => x.classList.remove('active'));
+        if(el) el.classList.add('active');
+    }
+    function goHome() {
+        document.getElementById('view-home').style.display = 'block';
+        document.getElementById('view-subcat').style.display = 'none';
+        document.getElementById('view-article').style.display = 'none';
+    }
+    function goBackToSub() {
+        document.getElementById('view-article').style.display = 'none';
+        document.getElementById('view-subcat').style.display = 'block';
+    }
+
+    // --- LIVE GEMINI AI LOGIC ---
+    function toggleChat() {
+        const f = document.getElementById('chat-frame');
+        const bubble = document.querySelector('.chat-message-bubble');
+        if (f.style.display === 'flex') { f.style.display = 'none'; bubble.style.opacity = '1'; } 
+        else { f.style.display = 'flex'; bubble.style.opacity = '0'; }
+    }
+    function handleEnter(e) { if(e.key === 'Enter') sendMsg(); }
+    
+    async function sendMsg() {
+        const input = document.getElementById('userMsg');
+        const txt = input.value.trim();
+        if(!txt) return;
+        
+        addMsg(txt, 'user');
+        input.value = '';
+        
+        const loadingId = 'loading-' + Date.now();
+        const history = document.getElementById('chatHistory');
+        history.innerHTML += `<div id="${loadingId}" class="msg bot" style="color:#6B778C;">Thinking...</div>`;
+        history.scrollTop = history.scrollHeight;
+
+        // 1. GATHER CONTEXT
+        let context = "";
+        for(let cat in DATA) {
+            for(let sub in DATA[cat].subs) {
+                DATA[cat].subs[sub].articles.forEach(a => {
+                    context += `Title: ${a.title}\nContent: ${a.content.replace(/<[^>]*>?/gm, '')}\n\n`;
+                });
+            }
+        }
+
+        // 2. CALL GEMINI (HYBRID MODE)
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_KEY}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            // ⚠️ UPDATED PROMPT: ALLOWS GENERAL IT KNOWLEDGE
+                            text: `You are a Level 2 IT Support Specialist.
+                                   
+                                   COMPANY KNOWLEDGE BASE:
+                                   ${context}
+                                   
+                                   INSTRUCTIONS:
+                                   1. FIRST, check the "COMPANY KNOWLEDGE BASE" above. If the answer is there, summarize it strictly.
+                                   2. IF the answer is NOT in the Knowledge Base, use your own general IT expert knowledge to answer (e.g., Excel tips, Windows errors, definitions, troubleshooting).
+                                   3. If the question is not IT-related (e.g., cooking, sports), politely refuse.
+                                   4. Be concise, friendly, and professional.
+                                   
+                                   USER QUESTION: ${txt}`
+                        }]
+                    }]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error("API Blocked by Firewall");
+            }
+
+            const data = await response.json();
+            const aiReply = data.candidates[0].content.parts[0].text;
+            
+            document.getElementById(loadingId).remove();
+            addMsg(aiReply, 'bot');
+
+        } catch (error) {
+            document.getElementById(loadingId).remove();
+            // SHOW REAL ERROR (As requested)
+            addMsg("⚠️ AI Error: " + error.message, 'bot');
+        }
+    }
+
+    function addMsg(text, type) {
+        const history = document.getElementById('chatHistory');
+        const div = document.createElement('div');
+        div.className = `msg ${type}`;
+        div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+        history.appendChild(div);
+        history.scrollTop = history.scrollHeight;
+    }
+
+    init();
+</script>
+</body>
+</html>
